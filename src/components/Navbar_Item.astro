@@ -1,0 +1,9 @@
+---
+const anchor = Astro.props.item;
+const basic_class = Astro.props.basicClass;
+const core_class = Astro.props.coreClass;
+---
+
+<a href={anchor.href} aria-current="page" class=`${basic_class} ${core_class}`
+  >{anchor.title}</a
+>
