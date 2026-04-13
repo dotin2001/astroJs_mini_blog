@@ -1,11 +1,11 @@
+import { fetchWithAuth } from "./lib/fetchWithAuth";
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
 // POST METHOD
-async function addBLog(token, blog_title, author, blog_content, user_id) {
-  const res = await fetch(`${API_URL}/add-blog`, {
+async function addBLog(blog_title, author, blog_content, user_id) {
+  const res = await fetchWithAuth(`${API_URL}/add-blog`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ blog_title, author, blog_content, user_id }),
@@ -16,7 +16,7 @@ async function addBLog(token, blog_title, author, blog_content, user_id) {
   return res.json();
 }
 
-async function updateBLog(token, blog_id, blog_title, blog_content) {
+async function updateBLog(blog_id, blog_title, blog_content) {
   const payload = {};
   if (blog_id) {
     payload.blog_id = blog_id;
@@ -24,10 +24,9 @@ async function updateBLog(token, blog_id, blog_title, blog_content) {
     if (blog_content) payload.blog_content = blog_content;
   }
 
-  const res = await fetch(`${API_URL}/update-blog`, {
+  const res = await fetchWithAuth(`${API_URL}/update-blog`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
@@ -38,11 +37,10 @@ async function updateBLog(token, blog_id, blog_title, blog_content) {
   return res.json();
 }
 
-async function removeBLog(token, blog_id) {
-  const res = await fetch(`${API_URL}/delete-blog`, {
+async function removeBLog(blog_id) {
+  const res = await fetchWithAuth(`${API_URL}/delete-blog`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ blog_id }),
@@ -54,12 +52,9 @@ async function removeBLog(token, blog_id) {
 }
 
 // GET METHOD
-async function getAllBlog(token) {
-  const res = await fetch(`${API_URL}/blogs`, {
+async function getAllBlog() {
+  const res = await fetchWithAuth(`${API_URL}/blogs`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   if (!res.ok) throw new Error("Unauthorized");
@@ -67,12 +62,9 @@ async function getAllBlog(token) {
   return res.json();
 }
 
-async function getBlogById(token, blog_id) {
-  const res = await fetch(`${API_URL}/blog/${blog_id}`, {
+async function getBlogById(blog_id) {
+  const res = await fetchWithAuth(`${API_URL}/blog/${blog_id}`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   if (!res.ok) throw new Error("Unauthorized");

@@ -1,3 +1,5 @@
+import { tokenStore } from "./token.service";
+import { fetchWithAuth } from "./lib/fetchWithAuth";
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
 // POST METHOD
@@ -16,6 +18,9 @@ async function register(email, user_name, password, confirm_password) {
 }
 
 async function login(email, password) {
+  console.log(email);
+  console.log(password);
+
   const res = await fetch(`${API_URL}/login`, {
     method: "POST",
     headers: {
@@ -26,23 +31,29 @@ async function login(email, password) {
 
   if (!res.ok) throw new Error("Login failed");
 
-  return res.json(); // thường trả token + user
+  const data = await res.json();
+
+  // 🔥 lưu cả 2 token
+  tokenStore.setAccess(data.access_token);
+  tokenStore.setRefresh(data.refresh_token);
+
+  return data; // thường trả token + user
 }
 
-async function refresh(token) {
-  const res = await fetch(`${API_URL}/refresh`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+// async function refresh(token) {
+//   const res = await fetch(`${API_URL}/refresh`, {
+//     method: "POST",
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
 
-  if (!res.ok) throw new Error("Unauthorized");
+//   if (!res.ok) throw new Error("Unauthorized");
 
-  return res.json();
-}
+//   return res.json();
+// }
 
-async function updateUser(token, user_name, avt_img, role, description) {
+async function updateUser(user_name, avt_img, role, description) {
   const payload = {};
 
   if (user_name) payload.user_name = user_name;
@@ -50,10 +61,9 @@ async function updateUser(token, user_name, avt_img, role, description) {
   if (role) payload.role = role;
   if (description) payload.description = description;
 
-  const res = await fetch(`${API_URL}/update-user`, {
+  const res = await fetchWithAuth(`${API_URL}/update-user`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
@@ -64,12 +74,9 @@ async function updateUser(token, user_name, avt_img, role, description) {
   return res.json();
 }
 
-async function logout(token) {
-  const res = await fetch(`${API_URL}/logout`, {
+async function logout() {
+  const res = await fetchWithAuth(`/logout`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   if (!res.ok) throw new Error("Unauthorized");
@@ -78,12 +85,9 @@ async function logout(token) {
 }
 
 // GET METHOD
-async function getProfile(token) {
-  const res = await fetch(`${API_URL}/profile`, {
+async function getProfile() {
+  const res = await fetchWithAuth(`/profile`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   if (!res.ok) throw new Error("Unauthorized");
@@ -91,12 +95,9 @@ async function getProfile(token) {
   return res.json();
 }
 
-async function getAllUser(token) {
-  const res = await fetch(`${API_URL}/users`, {
+async function getAllUser() {
+  const res = await fetchWithAuth(`/users`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   if (!res.ok) throw new Error("Unauthorized");
@@ -104,12 +105,9 @@ async function getAllUser(token) {
   return res.json();
 }
 
-async function getUserById(token, id) {
-  const res = await fetch(`${API_URL}/user/${id}`, {
+async function getUserById(id) {
+  const res = await fetchWithAuth(`/user/${id}`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   if (!res.ok) throw new Error("Unauthorized");
@@ -120,7 +118,6 @@ async function getUserById(token, id) {
 export const authService = {
   login,
   register,
-  refresh,
   updateUser,
   logout,
   getProfile,

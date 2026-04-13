@@ -1,13 +1,13 @@
 const { comment } = require("postcss");
+import { fetchWithAuth } from "./lib/fetchWithAuth";
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
 // POST METHOD
-async function addComment(token, user_id, blog_id, comment_content) {
+async function addComment(user_id, blog_id, comment_content) {
   const res = await fetch(`${API_URL}/add-comment-blog`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ user_id, blog_id, comment_content }),
@@ -18,11 +18,10 @@ async function addComment(token, user_id, blog_id, comment_content) {
   return res.json();
 }
 
-async function removeComment(token, comment_id) {
+async function removeComment(comment_id) {
   const res = await fetch(`${API_URL}/delete-comment-blog`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ comment_id }),
@@ -34,12 +33,9 @@ async function removeComment(token, comment_id) {
 }
 
 // GET METHOD
-async function getAllComment(token) {
+async function getAllComment() {
   const res = await fetch(`${API_URL}/comments`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   if (!res.ok) throw new Error("Unauthorized");
